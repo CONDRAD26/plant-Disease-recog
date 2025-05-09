@@ -9,7 +9,7 @@ def get_db_connection():
     return mysql.connector.connect(
         host="localhost",
         user="root",  # Default XAMPP MySQL username
-        password="",  # Default XAMPP MySQL password (empty)
+        password="", 
         database="plant_app"
     )
 
@@ -143,7 +143,7 @@ def main_app():
                     st.write("Our prediction")
                     result_index = model_prediction(test_image)  # You need to implement this function
                     # Define Classname
-                    class_name = ['Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot', 'Corn_(maize)___Common_rust_', 'Corn_(maize)___healthy', 'Corn_(maize)___Northern_Leaf_Blight','Tomato___Bacterial_spot','Tomato___Early_blight','Tomato___healthy','Tomato___Late_blight','Tomato___Leaf_Mold','Tomato___Septoria_leaf_spot','Tomato___Spider_mites Two-spotted_spider_mite','Tomato___Target_Spot','Tomato___Tomato_mosaic_virus','Tomato___Tomato_Yellow_Leaf_Curl_Virus']
+                    class_name = ['Corn_(maize)___Common_rust_', 'Corn_(maize)___healthy']
                     st.success(f"Model is predicting it's a {class_name[result_index]}")
             else:
                 st.warning("Please upload an image first.")
@@ -165,7 +165,7 @@ def main_app():
                     st.write("Our prediction")
                     result_index = model_prediction(test_image)  # You need to implement this function
                     # Define Classname
-                    class_name = ['Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot', 'Corn_(maize)___Common_rust_', 'Corn_(maize)___healthy', 'Corn_(maize)___Northern_Leaf_Blight','Tomato___Bacterial_spot','Tomato___Early_blight','Tomato___healthy','Tomato___Late_blight','Tomato___Leaf_Mold','Tomato___Septoria_leaf_spot','Tomato___Spider_mites Two-spotted_spider_mite','Tomato___Target_Spot','Tomato___Tomato_mosaic_virus','Tomato___Tomato_Yellow_Leaf_Curl_Virus']
+                    class_name = ['Corn_(maize)___Common_rust_', 'Corn_(maize)___healthy']
                     st.success(f"Model is predicting it's a {class_name[result_index]}")
             else:
                 st.warning("Please capture an image first.")
