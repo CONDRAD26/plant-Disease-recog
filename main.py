@@ -193,5 +193,4 @@ def main_app():
     elif app_mode == "Rust Management":
         show_management_page()
 
-# Run the app directly without authentication
 main_app()
