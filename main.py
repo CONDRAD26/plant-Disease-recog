@@ -1,72 +1,7 @@
 import streamlit as st
-import mysql.connector
 import tensorflow as tf
 import numpy as np
 from PIL import Image
-
-# Database connection
-def get_db_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",  # Default XAMPP MySQL username
-        password="", 
-        database="plant_app"
-    )
-
-# Function to check login credentials
-def check_login(username, password):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    query = "SELECT password FROM users WHERE username = %s"
-    cursor.execute(query, (username,))
-    result = cursor.fetchone()
-    conn.close()
-    if result and result[0] == password:
-        return True
-    return False
-
-# Function to register a new user
-def register_user(username, password):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        query = "INSERT INTO users (username, password) VALUES (%s, %s)"
-        cursor.execute(query, (username, password))
-        conn.commit()
-        conn.close()
-        return True
-    except mysql.connector.Error as err:
-        st.error(f"Error: {err}")
-        conn.close()
-        return False
-
-# Login Page
-def login_page():
-    st.title("Login")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    if st.button("Login"):
-        if check_login(username, password):
-            st.session_state.logged_in = True
-            st.session_state.username = username
-            st.success("Logged in successfully!")
-        else:
-            st.error("Invalid username or password")
-
-# Registration Page
-def registration_page():
-    st.title("Register")
-    new_username = st.text_input("New Username")
-    new_password = st.text_input("New Password", type="password")
-    confirm_password = st.text_input("Confirm Password", type="password")
-    if st.button("Register"):
-        if new_password == confirm_password:
-            if register_user(new_username, new_password):
-                st.success("Registration successful! Please log in.")
-            else:
-                st.error("Username already exists or registration failed.")
-        else:
-            st.error("Passwords do not match.")
 
 # Tensorflow Model Prediction
 def model_prediction(test_image):
@@ -77,6 +12,94 @@ def model_prediction(test_image):
     prediction = model.predict(input_arr)
     result_index = np.argmax(prediction)
     return result_index
+
+# Common Rust Management Page Content
+def show_management_page():
+    st.header("Common Rust Disease Management in Maize")
+    
+    # Disease Overview
+    st.subheader("Disease Overview")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image("https://www.apsnet.org/publications/imageresources/PublishingImages/CommonRustFigure1.jpg", 
+                caption="Common Rust symptoms on maize leaves", width=300)
+    with col2:
+        st.markdown("""
+        **Scientific Name**: Puccinia sorghi  
+        **Primary Host**: Maize (Zea mays)  
+        **Season**: Favors cool, moist conditions (60-70°F)  
+        **Severity**: Can cause 10-20% yield loss in susceptible varieties
+        """)
+    
+    # Management Strategies
+    st.subheader("Integrated Management Strategies")
+    
+    st.markdown("""
+    ### Cultural Control Methods
+    """)
+    with st.expander("Show Cultural Control Methods"):
+        st.markdown("""
+        - **Resistant Varieties**: Plant rust-resistant maize hybrids
+        - **Crop Rotation**: Rotate with non-host crops (soybeans, wheat)
+        - **Field Sanitation**: Remove crop debris and volunteer plants
+        - **Planting Time**: Adjust planting dates to avoid cool, moist periods
+        - **Plant Spacing**: Ensure proper spacing for good air circulation
+        """)
+    
+    st.markdown("""
+    ### Chemical Control Methods
+    """)
+    with st.expander("Show Chemical Control Methods"):
+        st.markdown("""
+        - **Fungicide Types**:
+          - Triazoles (e.g., propiconazole, tebuconazole)
+          - Strobilurins (e.g., azoxystrobin, pyraclostrobin)
+          - Mixed formulations (e.g., propiconazole + azoxystrobin)
+        
+        - **Application Timing**:
+          - First spray at disease detection
+          - Follow-up sprays at 10-14 day intervals if weather favors disease
+          - Critical period: from knee-high to tasseling stages
+        
+        - **Application Tips**:
+          - Use sufficient water volume (20-30 gallons/acre)
+          - Ensure good coverage of all leaves
+          - Follow label instructions and pre-harvest intervals
+        """)
+    
+    # Monitoring and Thresholds
+    st.subheader("Monitoring and Action Thresholds")
+    st.markdown("""
+    - **Scouting Frequency**: Weekly during vegetative stages
+    - **Threshold for Action**:
+      - 5-10% leaf area affected on lower leaves
+      - Disease present during cool, moist weather
+      - Susceptible variety planted
+    - **High Risk Conditions**:
+      - Temperatures 60-70°F (16-21°C)
+      - High humidity (>90%) or leaf wetness
+      - Dense crop canopy
+    """)
+    
+    # Prevention Calendar
+    st.subheader("Seasonal Prevention Calendar")
+    st.table({
+        "Growth Stage": ["Pre-planting", "Early Vegetative", "Late Vegetative", "Reproductive"],
+        "Actions": [
+            "Select resistant varieties, clean field",
+            "Begin scouting, remove volunteers",
+            "Apply first fungicide if needed",
+            "Monitor upper leaves, apply fungicide if needed"
+        ]
+    })
+    
+    # Additional Resources
+    st.subheader("Additional Resources")
+    st.markdown("""
+    - [APSnet: Common Rust of Corn](https://www.apsnet.org/edcenter/disandpath/fungalbasidio/pdlessons/Pages/CornRust.aspx)
+    - [Purdue Extension: Corn Disease Guide](https://www.extension.purdue.edu/extmedia/BP/BP-56-W.pdf)
+    - [FAO: Maize Disease Management](http://www.fao.org/3/y4011e/y4011e00.htm)
+    """)
 
 # Main Application
 def main_app():
@@ -91,17 +114,20 @@ def main_app():
     )
 
     st.sidebar.title('Dashboard')
-    app_mode = st.sidebar.selectbox("Select page", ["Home", "About", "Disease Recognition", "Disease Recognition (Take a Photo)"], index=0)
+    app_mode = st.sidebar.selectbox("Select page", 
+                                  ["Home", "About", "Disease Recognition", 
+                                   "Disease Recognition (Take a Photo)", "Rust Management"],
+                                  index=0)
 
     # Home page
     if app_mode == "Home":
-        st.header("Plant Disease Recognition System")
+        st.header("Common Rust Disease in Maize")
         image_path = "plant.jpg"
-        st.image(image_path, width=450, caption="Welcome to the Plant Recognition System")
+        st.image(image_path, width=450, caption="Welcome to the Common Rust Disease Recognition System")
 
         # Welcome Section
         st.title("Your Smart Assistant for Plant Health")
-        st.subheader("Identify Plant Diseases, Pests, and Nutrient Deficiencies with Ease")
+        st.subheader("Identify Common Rust Disease with Ease")
         st.write("""
         Explore the cutting-edge technology designed to help you diagnose plant issues and receive instant solutions to keep your farm or garden thriving.
         """, unsafe_allow_html=True)
@@ -109,42 +135,37 @@ def main_app():
         # How It Works Section
         st.header("How It Works:")
         st.write("""
-        1. **Capture a Clear Image** : Take a photo of your plant or crop showing any issues.
-        2. **Upload the Image** : Use our user-friendly interface to upload the picture.
-        3. **AI-Driven Analysis** : Our advanced AI technology instantly analyzes the plant for diseases, pests, or deficiencies.
-        4. **Get Personalized Recommendations** : Receive tailored advice for optimal plant care.
+        1. **Capture a Clear Image**: Take a photo of your maize plant showing symptoms
+        2. **Upload the Image**: Use our interface to upload the picture
+        3. **AI-Driven Analysis**: Our technology analyzes for Common Rust disease
+        4. **Get Management Advice**: Receive tailored recommendations
         """, unsafe_allow_html=True)
 
-        st.write("""
-        Ready to get started? Let’s ensure your plants are healthy and flourishing. 
-        """, unsafe_allow_html=True)
     # About Us Page
     elif app_mode == "About":
         st.header("About")
         st.markdown("""
-        ### About Our Dataset
-        Our plant disease recognition system leverages a comprehensive dataset of images, carefully curated to represent a wide range of plant species and diseases. This dataset includes over 10,000 images of plants, each labeled with the specific disease or condition affecting the plant. The images were sourced from various agricultural research institutions, universities, and online repositories, ensuring a diverse and representative sample of plant diseases. This extensive dataset allows our system to learn patterns and characteristics of different plant diseases, enabling it to make accurate predictions and provide valuable insights for plant health management.
-        """, unsafe_allow_html=True)
+        ### About Our System
+        Our Common Rust recognition system uses advanced AI technology trained on thousands of maize disease images to provide accurate identification and management recommendations for farmers and agronomists.
+        """)
 
     # Disease Recognition Page
     elif app_mode == "Disease Recognition":
         st.header("Disease Recognition")
         test_image = st.file_uploader("Choose an Image", type=['jpg', 'png', 'jpeg'])
-        if st.button("Show Image"):
-            if test_image is not None:
-                st.image(test_image, use_column_width=True, caption="Uploaded Image")
-            else:
-                st.warning("Please upload an image first.")
+        
+        if test_image is not None and st.button("Show Image"):
+            st.image(test_image, use_column_width=True, caption="Uploaded Image")
 
-        # Predict Button
         if st.button("Predict"):
             if test_image is not None:
-                with st.spinner("Please Wait....."):
-                    st.write("Our prediction")
-                    result_index = model_prediction(test_image)  # You need to implement this function
-                    # Define Classname
+                with st.spinner("Analyzing..."):
+                    result_index = model_prediction(test_image)
                     class_name = ['Corn_(maize)___Common_rust_', 'Corn_(maize)___healthy']
-                    st.success(f"Model is predicting it's a {class_name[result_index]}")
+                    prediction = class_name[result_index]
+                    st.success(f"Model Prediction: {prediction.replace('_', ' ').replace('(', '').replace(')', '')}")
+                    if "Common_rust" in prediction:
+                        st.info("Common Rust detected! Visit the 'Rust Management' page for control recommendations.")
             else:
                 st.warning("Please upload an image first.")
 
@@ -152,35 +173,25 @@ def main_app():
     elif app_mode == "Disease Recognition (Take a Photo)":
         st.header("Disease Recognition (Take a Photo)")
         test_image = st.camera_input("Take an Image")
-        if st.button("Show Image"):
-            if test_image is not None:
-                st.image(test_image, use_column_width=True, caption="Captured Image")
-            else:
-                st.warning("Please capture an image first.")
+        
+        if test_image is not None and st.button("Show Image"):
+            st.image(test_image, use_column_width=True, caption="Captured Image")
 
-        # Predict Button
         if st.button("Predict"):
             if test_image is not None:
-                with st.spinner("Please Wait....."):
-                    st.write("Our prediction")
-                    result_index = model_prediction(test_image)  # You need to implement this function
-                    # Define Classname
+                with st.spinner("Analyzing..."):
+                    result_index = model_prediction(test_image)
                     class_name = ['Corn_(maize)___Common_rust_', 'Corn_(maize)___healthy']
-                    st.success(f"Model is predicting it's a {class_name[result_index]}")
+                    prediction = class_name[result_index]
+                    st.success(f"Model Prediction: {prediction.replace('_', ' ').replace('(', '').replace(')', '')}")
+                    if "Common_rust" in prediction:
+                        st.info("Common Rust detected! Visit the 'Rust Management' page for control recommendations.")
             else:
                 st.warning("Please capture an image first.")
+    
+    # Rust Management Page
+    elif app_mode == "Rust Management":
+        show_management_page()
 
-# Initialize session state
-if 'logged_in' not in st.session_state:
-    st.session_state.logged_in = False
-
-# Check if user is logged in
-if st.session_state.logged_in:
-    main_app()
-else:
-    st.sidebar.title("Authentication")
-    auth_mode = st.sidebar.radio("Choose Mode", ["Login", "Register"])
-    if auth_mode == "Login":
-        login_page()
-    else:
-        registration_page()
+# Run the app directly without authentication
+main_app()
